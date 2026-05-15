@@ -402,18 +402,6 @@ function saveToStorage() {
 const lyricsContainer = document.getElementById('lyrics-container');
 const lyricsText = document.getElementById('lyrics-text');
 
-audio.ontimeupdate = () => {
-    const currentTime = Math.floor(audio.currentTime);
-
-    if (fileName.includes("BeeePRO")) {
-        if (currentTime > 5 && currentTime < 10) lyricsText.innerText = "Продавцы имбовые, залетаем на BeeePRO!";
-        else if (currentTime >= 10 && currentTime < 15) lyricsText.innerText = "Лучший маркет в СНГ, это знают всё и всё!";
-        else if (currentTime >= 15) lyricsText.innerText = "Dublikata Studio на бите...";
-    } else {
-        lyricsText.innerText = "Слушаем: " + fileName;
-    }
-};
-
 let filesData = JSON.parse(localStorage.getItem('dublikata_files')) || {};
 
 if (Object.keys(filesData).length === 0) {
@@ -479,6 +467,25 @@ function renderFileList() {
         fileList.appendChild(li);
     });
 }
+
+audio.ontimeupdate = () => {
+    const lyricsText = document.getElementById('lyrics-text');
+    if (!lyricsText) return; 
+
+    const currentTime = Math.floor(audio.currentTime);
+    
+    const currentName = currentFileNameDisplay ? currentFileNameDisplay.innerText : "";
+
+    if (currentName.includes("BeeePRO")) {
+        if (currentTime >= 0 && currentTime < 5) lyricsText.innerText = "Dublikata Studio представляет...";
+        else if (currentTime >= 5 && currentTime < 10) lyricsText.innerText = "Продавцы имбовые, залетаем на BeeePRO!";
+        else if (currentTime >= 10 && currentTime < 15) lyricsText.innerText = "Лучший маркет в СНГ, это знают всё и всё!";
+        else if (currentTime >= 15 && currentTime < 20) lyricsText.innerText = "Dublikata Studio на бите...";
+        else lyricsText.innerText = "🔥🔥🔥";
+    } else {
+        lyricsText.innerText = "Слушаем: " + currentName;
+    }
+};
 
 function getFileIcon(fileName) {
     const ext = fileName.split('.').pop().toLowerCase();
