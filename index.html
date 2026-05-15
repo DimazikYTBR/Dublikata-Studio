@@ -295,23 +295,15 @@
         </div>
         
         <ul class="file-list" id="file-list">
-            <li class="file-item active" data-filename="index.html">
-                <img src="https://img.icons8.com/color/24/html-5--v1.png" alt="html">
-                index.html
-            </li>
-            <li class="file-item" data-filename="style.css">
-                <img src="https://img.icons8.com/color/24/css3.png" alt="css">
-                style.css
-            </li>
-            <li class="file-item" data-filename="script.js">
-                <img src="https://img.icons8.com/color/24/javascript--v1.png" alt="js">
-                script.js
-            </li>
+
         </ul>
         
-        <div class="explorer-actions">
-            <button class="add-file-btn">+ Добавить файл</button>
-        </div>
+<div class="explorer-actions">
+    <button class="add-file-btn" onclick="document.getElementById('real-file-input').click()">
+        + Добавить файл
+    </button>
+    <input type="file" id="real-file-input" style="display: none;" multiple>
+</div>
     </aside>
 
     <main class="code-editor-area">
@@ -324,6 +316,45 @@
 </div>
 
 <script>
+const fileInput = document.getElementById('real-file-input');
+const fileList = document.getElementById('file-list');
+
+fileInput.addEventListener('change', function(e) {
+    const files = e.target.files;
+    
+    for (let file of files) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const content = e.target.result;
+            const fileName = file.name;
+
+            filesData[fileName] = content;
+
+            const li = document.createElement('li');
+            li.className = 'file-item';
+            
+            let icon = 'https://img.icons8.com/color/24/file.png';
+            if (fileName.endsWith('.html')) icon = 'https://img.icons8.com/color/24/html-5--v1.png';
+            if (fileName.endsWith('.css')) icon = 'https://img.icons8.com/color/24/css3.png';
+            if (fileName.endsWith('.js')) icon = 'https://img.icons8.com/color/24/javascript--v1.png';
+
+            li.innerHTML = `<img src="${icon}" alt="icon"> ${fileName}`;
+
+            li.addEventListener('click', () => {
+                document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+                li.classList.add('active');
+                currentFileNameDisplay.innerText = fileName;
+                editorTextArea.value = filesData[fileName];
+            });
+
+            fileList.appendChild(li);
+        };
+
+        reader.readAsText(file);
+    }
+});
+
 const fileItems = document.querySelectorAll('.file-item');
 const currentFileNameDisplay = document.getElementById('current-filename');
 const editorTextArea = document.getElementById('editor');
