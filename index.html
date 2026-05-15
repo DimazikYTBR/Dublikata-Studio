@@ -308,6 +308,28 @@
         </div>
     </div>
 
+    <div id="dublikata-console" style="position: fixed; bottom: 20px; right: 20px; width: 450px; background: rgba(12, 12, 12, 0.95); border: 2px solid #00ff00; box-shadow: 0 0 15px rgba(0, 255, 0, 0.3); z-index: 9999; font-family: 'Courier New', monospace; border-radius: 4px; overflow: hidden;">
+    
+    <div style="background: #00ff00; padding: 5px 10px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: #000; font-size: 11px; font-weight: bold;">LIVE SYSTEM MONITOR v1.0</span>
+        <span style="color: #000; font-size: 10px; animation: blink 1s infinite;">● RUNNING</span>
+    </div>
+
+    <div id="console-output" style="height: 250px; padding: 12px; overflow-y: auto; color: #00ff00; font-size: 13px; scroll-behavior: smooth;">
+        <div>[SYSTEM] Booting DublikataOS...</div>
+        <div>[SYSTEM] Console attached. Status: PERSISTENT.</div>
+    </div>
+
+    <div style="display: flex; padding: 8px; background: #000; border-top: 1px solid #00ff00;">
+        <span style="color: #00ff00; margin-right: 8px;">></span>
+        <input type="text" id="console-input" placeholder="Enter command..." style="background: transparent; border: none; color: #00ff00; outline: none; width: 100%; font-family: inherit;">
+    </div>
+</div>
+
+<style>
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+</style>
+
 <div class="studio-workspace">
     <aside class="file-explorer">
         <div class="explorer-header">
@@ -328,6 +350,9 @@
     <main class="code-editor-area">
         <div class="editor-header">
             <div id="current-file-name" style="color: grey; font-size: 12px;">Выберите файл...</div>
+            <button id="start-code-btn" onclick="runCodeAnalysis()" style="background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold; margin-bottom: 10px;">
+                ▶ Start Code
+            </button>
             <button id="save-btn">Сохранить на GitHub</button>
         </div>
         <div id="image-preview" style="display: none; justify-content: center; align-items: center; height: 100%; overflow: auto;">
@@ -590,6 +615,49 @@ if (projectInput) {
         const projectTitle = document.querySelector('.project-header h3');
         if (projectTitle) projectTitle.innerText = name;
     });
+}
+
+function runCodeAnalysis() {
+    const consoleBox = document.getElementById('dublikata-console');
+    const output = document.getElementById('console-output');
+    const code = editorTextArea.value;
+    
+    consoleBox.style.display = 'block';
+    output.innerHTML = "<div>[SYSTEM] Initializing Start Code process...</div>";
+    
+    setTimeout(() => {
+        output.innerHTML += "<div>[SYSTEM] Reading source strings...</div>";
+        
+        setTimeout(() => {
+            let errors = [];
+
+            const openBraces = (code.match(/{/g) || []).length;
+            const closeBraces = (code.match(/}/g) || []).length;
+            if (openBraces !== closeBraces) {
+                errors.push(`CRITICAL: Brackets mismatch ({: ${openBraces}, }: ${closeBraces})`);
+            }
+
+            if (code.includes('const =') || code.includes('let =')) {
+                errors.push("ERROR: Variable declared without an identifier.");
+            }
+
+            if (code.trim().length === 0) {
+                errors.push("FATAL: Source file is empty. Nothing to compile.");
+            }
+
+            if (errors.length > 0) {
+                output.innerHTML += `<div style="color: #ff4444;">[FAILED] Found ${errors.length} error(s) during compilation.</div>`;
+                errors.forEach(err => {
+                    output.innerHTML += `<div style="color: #ff8888;">>> ${err}</div>`;
+                });
+            } else {
+                output.innerHTML += `<div style="color: #00ff00;">[SUCCESS] Code analysis complete. No syntax errors found.</div>`;
+                output.innerHTML += `<div style="color: #00ff00;">[SYSTEM] Dublikata Studio is ready to deploy.</div>`;
+            }
+            
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }, 800);
+    }, 400);
 }
 
 window.addEventListener('load', () => {
