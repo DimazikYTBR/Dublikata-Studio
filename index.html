@@ -448,7 +448,7 @@ const explorer = document.querySelector('.file-explorer');
 
 function renderFileList() {
     const list = document.getElementById('file-list');
-    if (!list) return; // Защита: если списка нет, не падаем
+    if (!list) return;
     
     list.innerHTML = '';
     
@@ -458,37 +458,42 @@ function renderFileList() {
         div.innerText = name;
         
         div.onclick = () => {
-            // 1. Пытаемся обновить заголовок (с защитой!)
-            const title = document.getElementById('current-file-name');
-            if (title) title.innerText = name;
+            document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+            li.classList.add('active');
+            currentFileNameDisplay.innerText = fileName;
 
-            const content = filesData[name];
+            const editor = document.getElementById('editor');
+            const imgPreview = document.getElementById('image-preview');
+            const previewImg = document.getElementById('preview-img');
+            const isAudio = fileName.endsWith('.mp3') || fileName.endsWith('.wav');
+            const musicBar = document.getElementById('music-player-bar');
+            const audio = document.getElementById('main-audio');
+            const trackName = document.getElementById('track-name');
+            const editorArea = document.querySelector('.code-editor-area');
 
-            // 2. УМНЫЙ РЕНДЕР (вместо старого)
-            if (name.endsWith('.mp3') || name.endsWith('.wav')) {
-                // Если это музыка — не показываем код!
-                if (editorTextArea) {
-                    editorTextArea.value = "// [AUDIO FILE]: " + name + "\n// Наслаждайся фонком в Dublikata Studio!";
-                    editorTextArea.style.color = "#007bff";
-                }
-                audio.src = content;
+            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(fileName);
+
+            if (isAudio) {
+                musicBar.style.display = 'flex';
+                editorArea.classList.add('shifted');
+                lyricsContainer.style.display = 'block';
+    
+                audio.src = filesData[fileName];
                 audio.play();
-                
-                // ЗАПУСК ИИ-ШАЗАМА
-                if (typeof aiShazam === 'function') aiShazam(name);
-
-            } else if (name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                // Если это фото — показываем его в превью
-                if (editorTextArea) editorTextArea.value = "// [IMAGE FILE]: " + name;
-                const preview = document.getElementById('image-preview'); // Если у тебя есть такой id
-                if (preview) preview.src = content;
-
-            } else {
-                // Если это обычный код (текст)
-                if (editorTextArea) {
-                    editorTextArea.style.color = "#fff";
-                    editorTextArea.value = content;
+                } else {
+                    if (musicBar.style.display === 'flex') {
+                    editorArea.classList.add('shifted');
                 }
+            }
+
+            if (isImage) {
+                editor.style.display = 'none';
+                imgPreview.style.display = 'flex';
+                previewImg.src = filesData[fileName];
+            } else {
+                editor.style.display = 'block';
+                imgPreview.style.display = 'none';
+                editor.value = filesData[fileName] || "";
             }
         };
         list.appendChild(div);
