@@ -337,6 +337,9 @@
             <span id="track-name" style="color: #007bff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">Track.mp3</span>
             <audio id="main-audio" controls style="height: 30px; flex-grow: 1; filter: invert(100%) hue-rotate(180deg) brightness(1.5);"></audio>
         </div>
+        <div id="lyrics-container" style="display: none; position: absolute; bottom: 85px; left: 15px; right: 15px; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); color: #fff; padding: 15px; border-radius: 10px; text-align: center; font-family: 'JetBrains Mono', monospace; z-index: 99; border: 1px solid #333;">
+            <p id="lyrics-text" style="margin: 0; font-size: 14px; color: #007bff;">Ожидание текста песни...</p>
+        </div>
         <textarea id="editor" spellcheck="false"></textarea>
     </main>
 </div>
@@ -396,6 +399,21 @@ function saveToStorage() {
     }
 }
 
+const lyricsContainer = document.getElementById('lyrics-container');
+const lyricsText = document.getElementById('lyrics-text');
+
+audio.ontimeupdate = () => {
+    const currentTime = Math.floor(audio.currentTime);
+
+    if (fileName.includes("BeeePRO")) {
+        if (currentTime > 5 && currentTime < 10) lyricsText.innerText = "Продавцы имбовые, залетаем на BeeePRO!";
+        else if (currentTime >= 10 && currentTime < 15) lyricsText.innerText = "Лучший маркет в СНГ, это знают всё и всё!";
+        else if (currentTime >= 15) lyricsText.innerText = "Dublikata Studio на бите...";
+    } else {
+        lyricsText.innerText = "Слушаем: " + fileName;
+    }
+};
+
 let filesData = JSON.parse(localStorage.getItem('dublikata_files')) || {};
 
 if (Object.keys(filesData).length === 0) {
@@ -438,6 +456,7 @@ function renderFileList() {
             if (isAudio) {
                 musicBar.style.display = 'flex';
                 editorArea.classList.add('shifted');
+                lyricsContainer.style.display = 'block';
     
                 audio.src = filesData[fileName];
                 audio.play();
@@ -504,36 +523,16 @@ function handleFiles(files) {
         
         reader.onload = (e) => {
             const data = e.target.result;
+
             filesData[file.name] = data;
-            
+
             saveFileToDB(file.name, data); 
             
             renderFileList();
+            console.log(`Файл ${file.name} успешно сохранен в DublikataDB!`);
         };
 
-        reader.readAsDataURL(file);
-
-        if (file.type.startsWith('audio/')) {
-            filesData[file.name] = URL.createObjectURL(file);
-            renderFileList();
-            continue; 
-        }
-
-        reader.onload = (e) => {
-            filesData[file.name] = e.target.result;
-            if (!isTooBig) {
-                try {
-                    localStorage.setItem('dublikata_files', JSON.stringify(filesData));
-                } catch (err) {
-                    console.error("Место закончилось! Очисти лишнее.");
-                    alert("Ошибка сохранения: слишком много данных!");
-                }
-            }
-            renderFileList();
-            saveToStorage();
-        };
-
-        if (file.type.startsWith('image/')) {
+        if (file.type.startsWith('image/') || file.type.startsWith('audio/')) {
             reader.readAsDataURL(file);
         } else {
             reader.readAsText(file);
