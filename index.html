@@ -312,6 +312,10 @@
         <div id="image-preview" style="display: none; justify-content: center; align-items: center; height: 100%; overflow: auto;">
             <img id="preview-img" src="" style="max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
         </div>
+        <div id="music-player-bar" style="display: none; background: #111; border-top: 1px solid #333; padding: 10px; position: absolute; bottom: 0; left: 0; right: 0; align-items: center; gap: 15px; border-radius: 0 0 15px 15px;">
+            <span id="track-name" style="color: #007bff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">Track.mp3</span>
+            <audio id="main-audio" controls style="height: 30px; flex-grow: 1; filter: invert(100%) hue-rotate(180deg) brightness(1.5);"></audio>
+        </div>
         <textarea id="editor" spellcheck="false"></textarea>
     </main>
 </div>
@@ -348,8 +352,21 @@ function renderFileList() {
             const editor = document.getElementById('editor');
             const imgPreview = document.getElementById('image-preview');
             const previewImg = document.getElementById('preview-img');
+            const isAudio = fileName.endsWith('.mp3') || fileName.endsWith('.wav');
+            const musicBar = document.getElementById('music-player-bar');
+            const audio = document.getElementById('main-audio');
+            const trackName = document.getElementById('track-name');
 
             const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(fileName);
+
+            if (isAudio) {
+                musicBar.style.display = 'flex';
+                trackName.innerText = fileName;
+                audio.src = filesData[fileName];
+                audio.play();
+            } else {
+
+            } 
 
             if (isImage) {
                 editor.style.display = 'none';
@@ -415,6 +432,13 @@ function handleFiles(files) {
             localStorage.setItem('dublikata_files', JSON.stringify(filesData));
             renderFileList();
         };
+
+        if (file.type.startsWith('audio/')) {
+            const blobUrl = URL.createObjectURL(file);
+            filesData[file.name] = blobUrl;
+            renderFileList();
+            continue;
+        }
 
         if (file.type.startsWith('image/')) {
             reader.readAsDataURL(file);
