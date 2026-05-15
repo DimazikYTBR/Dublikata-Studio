@@ -188,15 +188,54 @@
     font-size: 1.2rem;
 }
 
-.explorer-header {
-    padding: 15px 20px;
+.editor-header {
+    background: #111;
+    padding: 10px 20px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 5px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #444;
     border-bottom: 1px solid #1a1a1a;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+#save-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#save-btn:hover {
+    background: #0056b3;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.4);
+}
+
+#editor {
+    width: 100%;
+    height: calc(100% - 40px);
+    background: #050505;
+    color: #d4d4d4;
+    border: none;
+    padding: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    tab-size: 4;
+}
+
+.code-editor-area {
+    flex-grow: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 #project-name {
@@ -230,20 +269,22 @@
     </div>
 
 <div class="studio-workspace">
-<div class="explorer-header">
-    <span>ПРОЕКТ:</span>
-    <input type="text" id="project-name" value="DUBLIKATA" spellcheck="false">
-</div>
-        <ul class="file-list">
-            <li class="file-item active">
+    <aside class="file-explorer">
+        <div class="explorer-header">
+            <span>ПРОЕКТ:</span>
+            <input type="text" id="project-name" value="DUBLIKATA" spellcheck="false">
+        </div>
+        
+        <ul class="file-list" id="file-list">
+            <li class="file-item active" data-filename="index.html">
                 <img src="https://img.icons8.com/color/24/html-5--v1.png" alt="html">
                 index.html
             </li>
-            <li class="file-item">
+            <li class="file-item" data-filename="style.css">
                 <img src="https://img.icons8.com/color/24/css3.png" alt="css">
                 style.css
             </li>
-            <li class="file-item">
+            <li class="file-item" data-filename="script.js">
                 <img src="https://img.icons8.com/color/24/javascript--v1.png" alt="js">
                 script.js
             </li>
@@ -255,9 +296,11 @@
     </aside>
 
     <main class="code-editor-area">
-        <div class="editor-placeholder">
-            Выберите файл для редактирования
+        <div class="editor-header">
+            <span id="current-filename">index.html</span>
+            <button id="save-btn">Сохранить на GitHub</button>
         </div>
+        <textarea id="editor" spellcheck="false" placeholder="Начните писать код..."></textarea>
     </main>
 </div>
 
