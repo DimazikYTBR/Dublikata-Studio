@@ -309,6 +309,9 @@
             <span id="current-filename">index.html</span>
             <button id="save-btn">Сохранить на GitHub</button>
         </div>
+        <div id="image-preview" style="display: none; justify-content: center; align-items: center; height: 100%; overflow: auto;">
+            <img id="preview-img" src="" style="max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+        </div>
         <textarea id="editor" spellcheck="false"></textarea>
     </main>
 </div>
@@ -340,12 +343,25 @@ function renderFileList() {
 
         li.innerHTML = `<img src="${icon}" alt="icon"> ${fileName}`;
         
-        li.onclick = () => {
-            document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-            li.classList.add('active');
-            currentFileNameDisplay.innerText = fileName;
-            editorTextArea.value = filesData[fileName];
-        };
+li.onclick = () => {
+    document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+    li.classList.add('active');
+    currentFileNameDisplay.innerText = fileName;
+
+    const editor = document.getElementById('editor');
+    const imgPreview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+
+    if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.gif')) {
+        editor.style.display = 'none';
+        imgPreview.style.display = 'flex';
+        previewImg.src = filesData[fileName];
+    } else {
+        editor.style.display = 'block';
+        imgPreview.style.display = 'none';
+        editor.value = filesData[fileName];
+    }
+};
         fileList.appendChild(li);
     });
 }
@@ -379,7 +395,12 @@ function handleFiles(files) {
             localStorage.setItem('dublikata_files', JSON.stringify(filesData));
             renderFileList();
         };
-        reader.readAsText(file);
+
+        if (file.type.startsWith('image/')) {
+            reader.readAsDataURL(file);
+        } else {
+            reader.readAsText(file);
+        }
     }
 }
 
