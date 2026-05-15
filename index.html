@@ -7,6 +7,20 @@
   <title>Dublikata Studio</title>
   <link rel="stylesheet" href="css/style.css">
 <style>
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('./fonts/Inter.ttf') format('truetype');
+            font-weight: 100 900;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * { box-sizing: border-box; }
+
         #loader {
             position: fixed;
             top: 0;
@@ -28,10 +42,10 @@
 
         .studio-logo {
             color: #ffffff;
-            font-family: 'Arial Black', sans-serif;
             font-size: 2.5rem;
             letter-spacing: 4px;
             margin-bottom: 20px;
+            font-family: 'Inter', -apple-system, sans-serif;
             text-transform: uppercase;
             animation: fadeIn 1.5s ease-out;
         }
@@ -75,7 +89,7 @@
         .main-content {
             padding: 20px;
             color: white;
-            font-family: sans-serif;
+            font-family: 'Inter', -apple-system, sans-serif;
             text-align: center;
             margin-top: 50px;
         }
