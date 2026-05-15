@@ -618,46 +618,40 @@ if (projectInput) {
 }
 
 function runCodeAnalysis() {
-    const consoleBox = document.getElementById('dublikata-console');
     const output = document.getElementById('console-output');
     const code = editorTextArea.value;
     
-    consoleBox.style.display = 'block';
-    output.innerHTML = "<div>[SYSTEM] Initializing Start Code process...</div>";
+    output.innerHTML += "<div>[SYSTEM] Deep scanning source code...</div>";
     
     setTimeout(() => {
-        output.innerHTML += "<div>[SYSTEM] Reading source strings...</div>";
+        let errors = [];
+
+        const words = code.split(/\s+/);
+        const jsKeywords = ['const', 'let', 'var', 'function', 'if', 'else', 'return', 'console', 'async', 'await'];
         
-        setTimeout(() => {
-            let errors = [];
-
-            const openBraces = (code.match(/{/g) || []).length;
-            const closeBraces = (code.match(/}/g) || []).length;
-            if (openBraces !== closeBraces) {
-                errors.push(`CRITICAL: Brackets mismatch ({: ${openBraces}, }: ${closeBraces})`);
+        words.forEach(word => {
+            if (word.length > 3 && !jsKeywords.includes(word) && !word.includes('(') && !word.includes('.')) {
+                if(/[а-яА-Я]/.test(word)) {
+                    errors.push(`SYNTAX ERROR: Unexpected tokens found ("${word}"). Did you forget to switch layout?`);
+                }
             }
+        });
 
-            if (code.includes('const =') || code.includes('let =')) {
-                errors.push("ERROR: Variable declared without an identifier.");
-            }
+        if ((code.match(/{/g) || []).length !== (code.match(/}/g) || []).length) {
+            errors.push("CRITICAL: Unclosed braces detected.");
+        }
 
-            if (code.trim().length === 0) {
-                errors.push("FATAL: Source file is empty. Nothing to compile.");
-            }
-
-            if (errors.length > 0) {
-                output.innerHTML += `<div style="color: #ff4444;">[FAILED] Found ${errors.length} error(s) during compilation.</div>`;
-                errors.forEach(err => {
-                    output.innerHTML += `<div style="color: #ff8888;">>> ${err}</div>`;
-                });
-            } else {
-                output.innerHTML += `<div style="color: #00ff00;">[SUCCESS] Code analysis complete. No syntax errors found.</div>`;
-                output.innerHTML += `<div style="color: #00ff00;">[SYSTEM] Dublikata Studio is ready to deploy.</div>`;
-            }
-            
-            consoleBox.scrollTop = consoleBox.scrollHeight;
-        }, 800);
-    }, 400);
+        if (errors.length > 0) {
+            output.innerHTML += `<div style="color: #ff4444;">[FAILED] Analysis found ${errors.length} issue(s).</div>`;
+            errors.forEach(err => {
+                output.innerHTML += `<div style="color: #ff8888;">>> ${err}</div>`;
+            });
+        } else {
+            output.innerHTML += `<div style="color: #00ff00;">[SUCCESS] Source verified. Zero errors.</div>`;
+        }
+        
+        document.getElementById('dublikata-console').scrollTop = document.getElementById('dublikata-console').scrollHeight;
+    }, 600);
 }
 
 window.addEventListener('load', () => {
