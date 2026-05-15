@@ -336,15 +336,26 @@ function renderFileList() {
         li.className = 'file-item' + (currentFileNameDisplay.innerText === fileName ? ' active' : '');
         
         let icon = 'https://img.icons8.com/color/24/file.png';
-        if (fileName.endsWith('.html')) icon = 'https://img.icons8.com/color/24/html-5--v1.png';
-        if (fileName.endsWith('.css')) icon = 'https://img.icons8.com/color/24/css3.png';
-        if (fileName.endsWith('.js')) icon = 'https://img.icons8.com/color/24/javascript--v1.png';
-        if (fileName.endsWith('.txt')) icon = 'https://img.icons8.com/color/24/txt.png';
-        if (fileName.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
-            icon = 'https://img.icons8.com/color/24/image.png'; 
-        }
+        function getFileIcon(fileName) {
+        const ext = fileName.split('.').pop().toLowerCase();
+    
+        const icons = {
+            'html': 'https://img.icons8.com/color/24/html-5--v1.png',
+            'css': 'https://img.icons8.com/color/24/css3.png',
+            'js': 'https://img.icons8.com/color/24/javascript--v1.png',
+            'txt': 'https://img.icons8.com/color/24/txt.png',
+            'java': 'https://img.icons8.com/color/24/java-main.png',
+            'png': 'https://img.icons8.com/color/24/image.png',
+            'jpg': 'https://img.icons8.com/color/24/image.png',
+            'jpeg': 'https://img.icons8.com/color/24/image.png',
+            'apk': 'https://img.icons8.com/color/24/android-os.png',
+            'json': 'https://img.icons8.com/color/24/json--v1.png'
+        };
+
+        return icons[ext] || 'https://img.icons8.com/color/24/file.png';
 
         li.innerHTML = `<img src="${icon}" alt="icon"> ${fileName}`;
+    }
         
 li.onclick = () => {
     document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
