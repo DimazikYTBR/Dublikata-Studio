@@ -1,8 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-<link rel="apple-touch-icon" href="images/sapka.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -21,6 +19,7 @@
             align-items: center;
             z-index: 9999;
             transition: opacity 0.8s ease, visibility 0.8s;
+            overflow: hidden;
         }
 
         .loader-content {
@@ -30,7 +29,7 @@
         .studio-logo {
             color: #ffffff;
             font-family: 'Arial Black', sans-serif;
-            font-size: 2rem;
+            font-size: 2.5rem;
             letter-spacing: 4px;
             margin-bottom: 20px;
             text-transform: uppercase;
@@ -41,38 +40,40 @@
             color: #007bff;
         }
 
-        .progress-bar {
-            width: 200px;
-            height: 2px;
+        .progress-bar-container {
+            width: 400px;
+            height: 4px;
             background: #1a1a1a;
             border-radius: 10px;
             margin: 0 auto;
+            position: relative;
             overflow: hidden;
         }
 
-        .progress-fill {
-            width: 0%;
+        .progress-fill-XP {
+            width: 50px;
             height: 100%;
             background: #007bff;
-            box-shadow: 0 0 15px #007bff;
-            animation: loading 2s forwards cubic-bezier(0.42, 0, 0.58, 1);
+            border-radius: 10px;
+            box-shadow: 0 0 15px #007bff, 0 0 5px white inset;
+            position: absolute;
+            left: -55px;
+            animation: loadingXP 3s forwards;
         }
 
-        @keyframes loading {
-            0% { width: 0%; }
-            100% { width: 100%; }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes loadingXP {
+            0% { left: -55px; animation-timing-function: ease-in; }
+            15% { left: 50%; animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1); }
+            50% { left: 50%; animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1); }
+            85% { left: 50%; animation-timing-function: ease-out; }
+            100% { left: calc(100% + 5px); animation-timing-function: ease-out; }
         }
 
         .loader-hidden {
             opacity: 0;
             visibility: hidden;
         }
-  
+
         .main-content {
             padding: 20px;
             color: white;
@@ -87,8 +88,8 @@
     <div id="loader">
         <div class="loader-content">
             <h1 class="studio-logo">DUBLIKATA <span>STUDIO</span></h1>
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
+            <div class="progress-bar-container">
+                <div class="progress-fill-XP"></div>
             </div>
         </div>
     </div>
@@ -104,7 +105,7 @@
 
             setTimeout(() => {
                 loader.classList.add('loader-hidden');
-            }, 2200); 
+            }, 3000);
         });
     </script>
 </body>
