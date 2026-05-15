@@ -402,6 +402,26 @@ function loadFilesFromDB() {
     };
 }
 
+async function aiShazam(file) {
+    if (lyricsText) {
+        lyricsText.innerText = "AI: Анализирую частоты...";
+        lyricsText.style.color = "#007bff";
+    }
+
+    await new Promise(res => setTimeout(res, 2000));
+
+    if (file.name.toLowerCase().includes("beeepro") || file.name.toLowerCase().includes("perfect")) {
+        const textCode = `// AI: ТРЕК ОПОЗНАН\n[00:05] Продавцы имбовые, залетаем на BeeePRO!\n[00:10] Лучший маркет в СНГ!`;
+
+        const lrcName = file.name + ".lrc";
+        filesData[lrcName] = textCode;
+        saveFileToDB(lrcName, textCode);
+        
+        if (lyricsText) lyricsText.innerText = "AI: Текст успешно синхронизирован!";
+        renderFileList();
+    }
+}
+
 function saveToStorage() {
     try {
         const dataToSave = {};
@@ -427,81 +447,52 @@ const fileList = document.getElementById('file-list');
 const explorer = document.querySelector('.file-explorer');
 
 function renderFileList() {
-    fileList.innerHTML = '';
-    Object.keys(filesData).forEach(fileName => {
-        const li = document.createElement('li');
-        const isActive = currentFileNameDisplay.innerText === fileName;
-        li.className = 'file-item' + (isActive ? ' active' : '');
-
-        const iconUrl = getFileIcon(fileName);
-
-        li.innerHTML = `<img src="${iconUrl}" style="width:18px; height:18px; margin-right:10px;"><span>${fileName}</span>`;
-        
-        li.onclick = () => {
-            document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-            li.classList.add('active');
-            currentFileNameDisplay.innerText = fileName;
-
-            const editor = document.getElementById('editor');
-            const imgPreview = document.getElementById('image-preview');
-            const previewImg = document.getElementById('preview-img');
-            const isAudio = fileName.endsWith('.mp3') || fileName.endsWith('.wav');
-            const musicBar = document.getElementById('music-player-bar');
-            const audio = document.getElementById('main-audio');
-            const trackName = document.getElementById('track-name');
-            const editorArea = document.querySelector('.code-editor-area');
-
-            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(fileName);
-
-            if (isAudio) {
-                musicBar.style.display = 'flex';
-                editorArea.classList.add('shifted');
-                lyricsContainer.style.display = 'block';
+    const list = document.getElementById('file-list');
+    if (!list) return; // Защита: если списка нет, не падаем
     
-                audio.src = filesData[fileName];
+    list.innerHTML = '';
+    
+    Object.keys(filesData).forEach(name => {
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerText = name;
+        
+        div.onclick = () => {
+            // 1. Пытаемся обновить заголовок (с защитой!)
+            const title = document.getElementById('current-file-name');
+            if (title) title.innerText = name;
+
+            const content = filesData[name];
+
+            // 2. УМНЫЙ РЕНДЕР (вместо старого)
+            if (name.endsWith('.mp3') || name.endsWith('.wav')) {
+                // Если это музыка — не показываем код!
+                if (editorTextArea) {
+                    editorTextArea.value = "// [AUDIO FILE]: " + name + "\n// Наслаждайся фонком в Dublikata Studio!";
+                    editorTextArea.style.color = "#007bff";
+                }
+                audio.src = content;
                 audio.play();
-                } else {
-                    if (musicBar.style.display === 'flex') {
-                    editorArea.classList.add('shifted');
+                
+                // ЗАПУСК ИИ-ШАЗАМА
+                if (typeof aiShazam === 'function') aiShazam(name);
+
+            } else if (name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                // Если это фото — показываем его в превью
+                if (editorTextArea) editorTextArea.value = "// [IMAGE FILE]: " + name;
+                const preview = document.getElementById('image-preview'); // Если у тебя есть такой id
+                if (preview) preview.src = content;
+
+            } else {
+                // Если это обычный код (текст)
+                if (editorTextArea) {
+                    editorTextArea.style.color = "#fff";
+                    editorTextArea.value = content;
                 }
             }
-
-            if (isImage) {
-                editor.style.display = 'none';
-                imgPreview.style.display = 'flex';
-                previewImg.src = filesData[fileName];
-            } else {
-                editor.style.display = 'block';
-                imgPreview.style.display = 'none';
-                editor.value = filesData[fileName] || "";
-            }
         };
-        fileList.appendChild(li);
-        const currentNameDisplay = document.getElementById('current-file-name');
-        if (currentNameDisplay) {
-            currentNameDisplay.innerText = fileName; 
-        }
+        list.appendChild(div);
     });
-}
-
-async function aiShazam(file) {
-    if (lyricsText) {
-        lyricsText.innerText = "AI: Анализирую частоты...";
-        lyricsText.style.color = "#007bff";
-    }
-
-    await new Promise(res => setTimeout(res, 2000));
-
-    if (file.name.toLowerCase().includes("beeepro") || file.name.toLowerCase().includes("perfect")) {
-        const textCode = `// AI: ТРЕК ОПОЗНАН\n[00:05] Продавцы имбовые, залетаем на BeeePRO!\n[00:10] Лучший маркет в СНГ!`;
-
-        const lrcName = file.name + ".lrc";
-        filesData[lrcName] = textCode;
-        saveFileToDB(lrcName, textCode);
-        
-        if (lyricsText) lyricsText.innerText = "AI: Текст успешно синхронизирован!";
-        renderFileList();
-    }
 }
 
 function getFileIcon(fileName) {
