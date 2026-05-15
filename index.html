@@ -342,6 +342,45 @@
 </div>
 
 <script>
+const dbRequest = indexedDB.open("DublikataDB", 1);
+let db;
+
+dbRequest.onupgradeneeded = (e) => {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains("files")) {
+        db.createObjectStore("files");
+    }
+};
+
+dbRequest.onsuccess = (e) => {
+    db = e.target.result;
+    loadFilesFromDB(); 
+};
+
+function saveFileToDB(name, data) {
+    const transaction = db.transaction(["files"], "readwrite");
+    const store = transaction.objectStore("files");
+    store.put(data, name);
+}
+
+function loadFilesFromDB() {
+    const transaction = db.transaction(["files"], "readonly");
+    const store = transaction.objectStore("files");
+    const request = store.getAll();
+    const keysRequest = store.getAllKeys();
+
+    request.onsuccess = () => {
+        keysRequest.onsuccess = () => {
+            const keys = keysRequest.result;
+            const values = request.result;
+            keys.forEach((key, i) => {
+                filesData[key] = values[i];
+            });
+            renderFileList();
+        };
+    };
+}
+
 function saveToStorage() {
     try {
         const dataToSave = {};
@@ -461,10 +500,18 @@ explorer.addEventListener('drop', (e) => {
 
 function handleFiles(files) {
     for (let file of files) {
-        if (file.size > 25 * 1024 * 1024) {
-            alert(`Файл ${file.name} слишком тяжелый для браузера! (макс. 25МБ)`);
-            continue;
-        }
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            const data = e.target.result;
+            filesData[file.name] = data;
+            
+            saveFileToDB(file.name, data); 
+            
+            renderFileList();
+        };
+
+        reader.readAsDataURL(file);
 
         if (file.type.startsWith('audio/')) {
             filesData[file.name] = URL.createObjectURL(file);
@@ -472,7 +519,6 @@ function handleFiles(files) {
             continue; 
         }
 
-        const reader = new FileReader();
         reader.onload = (e) => {
             filesData[file.name] = e.target.result;
             if (!isTooBig) {
@@ -501,10 +547,9 @@ document.getElementById('real-file-input').addEventListener('change', (e) => {
 
 editorTextArea.addEventListener('input', () => {
     const currentFile = currentFileNameDisplay.innerText.trim();
-
     if (currentFile && filesData.hasOwnProperty(currentFile)) {
         filesData[currentFile] = editorTextArea.value;
-        saveToStorage();
+        saveFileToDB(currentFile, editorTextArea.value);
     }
 });
 
