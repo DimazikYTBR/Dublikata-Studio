@@ -477,36 +477,31 @@ function renderFileList() {
             }
         };
         fileList.appendChild(li);
+        const currentNameDisplay = document.getElementById('current-file-name');
+        if (currentNameDisplay) {
+            currentNameDisplay.innerText = fileName; 
+        }
     });
 }
 
-function recognizeAudio(file) {
-    const status = document.getElementById('ai-status');
-    const percent = document.getElementById('ai-percent');
-    status.style.display = 'block';
-    
-    let p = 0;
-    const interval = setInterval(() => {
-        p += Math.floor(Math.random() * 20);
-        percent.innerText = p + "%";
+async function aiShazam(file) {
+    if (lyricsText) {
+        lyricsText.innerText = "AI: Анализирую частоты...";
+        lyricsText.style.color = "#007bff";
+    }
+
+    await new Promise(res => setTimeout(res, 2000));
+
+    if (file.name.toLowerCase().includes("beeepro") || file.name.toLowerCase().includes("perfect")) {
+        const textCode = `// AI: ТРЕК ОПОЗНАН\n[00:05] Продавцы имбовые, залетаем на BeeePRO!\n[00:10] Лучший маркет в СНГ!`;
+
+        const lrcName = file.name + ".lrc";
+        filesData[lrcName] = textCode;
+        saveFileToDB(lrcName, textCode);
         
-        if (p >= 100) {
-            clearInterval(interval);
-            status.innerText = "AI: Трек опознан! Текст загружен.";
-
-            if (file.name.toLowerCase().includes("beeepro")) {
-                const lyricsCode = `[00:00] Dublikata Studio представляет...\n[00:05] Продавцы имбовые, залетаем на BeeePRO!\n[00:10] Лучший маркет в СНГ, это знают всё и всё!`;
-
-                filesData[file.name + ".lrc"] = lyricsCode;
-                saveFileToDB(file.name + ".lrc", lyricsCode); 
-                renderFileList();
-
-                editorTextArea.value = lyricsCode;
-            }
-            
-            setTimeout(() => status.style.display = 'none', 3000);
-        }
-    }, 200);
+        if (lyricsText) lyricsText.innerText = "AI: Текст успешно синхронизирован!";
+        renderFileList();
+    }
 }
 
 function getFileIcon(fileName) {
@@ -549,16 +544,16 @@ explorer.addEventListener('drop', (e) => {
 function handleFiles(files) {
     for (let file of files) {
         const reader = new FileReader();
-        
         reader.onload = (e) => {
             const data = e.target.result;
-
             filesData[file.name] = data;
-
-            saveFileToDB(file.name, data); 
             
+            saveFileToDB(file.name, data);
             renderFileList();
-            console.log(`Файл ${file.name} успешно сохранен в DublikataDB!`);
+
+            if (file.type.startsWith('audio/')) {
+                aiShazam(file);
+            }
         };
 
         if (file.type.startsWith('image/') || file.type.startsWith('audio/')) {
