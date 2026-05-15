@@ -342,6 +342,21 @@
 </div>
 
 <script>
+function saveToStorage() {
+    try {
+        const dataToSave = {};
+        for (let key in filesData) {
+            if (typeof filesData[key] === 'string' && !filesData[key].startsWith('blob:')) {
+                dataToSave[key] = filesData[key];
+            }
+        }
+        localStorage.setItem('dublikata_files', JSON.stringify(dataToSave));
+        console.log("Данные успешно сохранены в БД");
+    } catch (e) {
+        console.error("Критическая ошибка сохранения:", e);
+    }
+}
+
 let filesData = JSON.parse(localStorage.getItem('dublikata_files')) || {};
 
 if (Object.keys(filesData).length === 0) {
@@ -469,6 +484,7 @@ function handleFiles(files) {
                 }
             }
             renderFileList();
+            saveToStorage();
         };
 
         if (file.type.startsWith('image/')) {
@@ -484,14 +500,11 @@ document.getElementById('real-file-input').addEventListener('change', (e) => {
 });
 
 editorTextArea.addEventListener('input', () => {
-    const currentFile = currentFileNameDisplay.innerText;
-    if (currentFile && filesData[currentFile] !== undefined) {
+    const currentFile = currentFileNameDisplay.innerText.trim();
+
+    if (currentFile && filesData.hasOwnProperty(currentFile)) {
         filesData[currentFile] = editorTextArea.value;
-        try {
-            localStorage.setItem('dublikata_files', JSON.stringify(filesData));
-        } catch (e) {
-            console.error("Не удалось сохранить: память переполнена!");
-        }
+        saveToStorage();
     }
 });
 
