@@ -93,6 +93,129 @@
             text-align: center;
             margin-top: 50px;
         }
+
+        .studio-workspace {
+            display: flex;
+            height: calc(100vh - 50px);
+            background: #0a0a0a;
+            border-top: 1px solid #1a1a1a;
+        }
+
+        .file-explorer {
+            width: 260px;
+            background: #0f0f0f;
+            border-right: 1px solid #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .explorer-header {
+            padding: 15px 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .file-item {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #ccc;
+            transition: background 0.2s, color 0.2s;
+        }
+
+.file-item img {
+    width: 16px;
+    height: 16px;
+}
+
+.file-item:hover {
+    background: #1a1a1a;
+    color: #fff;
+}
+
+.file-item.active {
+    background: #1a1a1a;
+    color: #007bff;
+    border-left: 2px solid #007bff;
+}
+
+.explorer-actions {
+    padding: 20px;
+    border-top: 1px solid #1a1a1a;
+}
+
+.add-file-btn {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px dashed #333;
+    color: #666;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: 0.3s;
+}
+
+.add-file-btn:hover {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.code-editor-area {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #050505;
+}
+
+.editor-placeholder {
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.explorer-header {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #444;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+#project-name {
+    background: transparent;
+    border: none;
+    color: #007bff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    outline: none;
+    width: 100%;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+#project-name:focus {
+    color: #fff;
+    cursor: text;
+}
     </style>
 </head>
 <body style="background-color: #050505; margin: 0;">
@@ -106,19 +229,62 @@
         </div>
     </div>
 
-    <div class="main-content">
-        <h1>Сайт Dublikata Studio запущен</h1>
-        <p>Добро пожаловать в будущее разработки.</p>
-    </div>
+<div class="studio-workspace">
+<div class="explorer-header">
+    <span>ПРОЕКТ:</span>
+    <input type="text" id="project-name" value="DUBLIKATA" spellcheck="false">
+</div>
+        <ul class="file-list">
+            <li class="file-item active">
+                <img src="https://img.icons8.com/color/24/html-5--v1.png" alt="html">
+                index.html
+            </li>
+            <li class="file-item">
+                <img src="https://img.icons8.com/color/24/css3.png" alt="css">
+                style.css
+            </li>
+            <li class="file-item">
+                <img src="https://img.icons8.com/color/24/javascript--v1.png" alt="js">
+                script.js
+            </li>
+        </ul>
+        
+        <div class="explorer-actions">
+            <button class="add-file-btn">+ Добавить файл</button>
+        </div>
+    </aside>
 
-    <script>
-        window.addEventListener('load', () => {
-            const loader = document.getElementById('loader');
+    <main class="code-editor-area">
+        <div class="editor-placeholder">
+            Выберите файл для редактирования
+        </div>
+    </main>
+</div>
 
-            setTimeout(() => {
-                loader.classList.add('loader-hidden');
-            }, 4500); 
-        });
-    </script>
+<script>
+const projectInput = document.getElementById('project-name');
+
+const savedName = localStorage.getItem('dublikata_project_name');
+if (savedName) {
+    projectInput.value = savedName;
+}
+
+projectInput.addEventListener('input', (e) => {
+    localStorage.setItem('dublikata_project_name', e.target.value.toUpperCase());
+});
+
+projectInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        projectInput.blur();
+    }
+});
+window.addEventListener('load', () => {
+    const loader = document.getElementById('loader');
+
+    setTimeout(() => {
+        loader.classList.add('loader-hidden');
+    }, 4500); 
+});
+</script>
 </body>
 </html>
