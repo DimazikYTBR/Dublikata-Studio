@@ -485,16 +485,28 @@ document.getElementById('real-file-input').addEventListener('change', (e) => {
 
 editorTextArea.addEventListener('input', () => {
     const currentFile = currentFileNameDisplay.innerText;
-    filesData[currentFile] = editorTextArea.value;
-    localStorage.setItem('dublikata_files', JSON.stringify(filesData));
+    if (currentFile && filesData[currentFile] !== undefined) {
+        filesData[currentFile] = editorTextArea.value;
+        try {
+            localStorage.setItem('dublikata_files', JSON.stringify(filesData));
+        } catch (e) {
+            console.error("Не удалось сохранить: память переполнена!");
+        }
+    }
 });
 
 const savedName = localStorage.getItem('dublikata_project_name');
 if (savedName) projectInput.value = savedName;
 
-projectInput.addEventListener('input', (e) => {
-    localStorage.setItem('dublikata_project_name', e.target.value.toUpperCase());
-});
+if (projectInput) {
+    projectInput.addEventListener('input', (e) => {
+        const name = e.target.value.toUpperCase();
+        localStorage.setItem('dublikata_project_name', name);
+
+        const projectTitle = document.querySelector('.project-header h3');
+        if (projectTitle) projectTitle.innerText = name;
+    });
+}
 
 window.addEventListener('load', () => {
     const loader = document.getElementById('loader');
