@@ -337,9 +337,6 @@
             <span id="track-name" style="color: #007bff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">Track.mp3</span>
             <audio id="main-audio" controls style="height: 30px; flex-grow: 1; filter: invert(100%) hue-rotate(180deg) brightness(1.5);"></audio>
         </div>
-        <div id="ai-status" style="font-size: 10px; color: #007bff; margin-bottom: 5px; display: none;">
-            AI: Анализ аудиопотока... <span id="ai-percent">0%</span>
-        </div>
         <textarea id="editor" spellcheck="false"></textarea>
     </main>
 </div>
@@ -402,27 +399,6 @@ function loadFilesFromDB() {
     };
 }
 
-async function aiShazam(fileName) {
-    if (!fileName || typeof fileName !== 'string') return;
-
-    if (lyricsText) {
-        lyricsText.innerText = "AI: Анализирую частоты...";
-    }
-
-    await new Promise(res => setTimeout(res, 2000));
-
-    if (fileName.toLowerCase().includes("beeepro") || fileName.toLowerCase().includes("perfect")) {
-        const textCode = `// AI: ТРЕК ОПОЗНАН\n[00:05] Продавцы имбовые, залетаем на BeeePRO!\n[00:10] Лучший маркет в СНГ!`;
-        
-        const lrcName = fileName + ".lrc";
-        filesData[lrcName] = textCode;
-        saveFileToDB(lrcName, textCode);
-        
-        if (lyricsText) lyricsText.innerText = "AI: Текст синхронизирован!";
-        renderFileList(); 
-    }
-}
-
 function saveToStorage() {
     try {
         const dataToSave = {};
@@ -447,49 +423,6 @@ if (Object.keys(filesData).length === 0) {
 const fileList = document.getElementById('file-list');
 const explorer = document.querySelector('.file-explorer');
 
-function renderFileList() {
-    const list = document.getElementById('file-list');
-    if (!list) return;
-    
-    list.innerHTML = '';
-    
-    Object.keys(filesData).forEach(fileName => {
-        const div = document.createElement('div');
-        div.className = 'file-item';
-        div.innerText = fileName;
-        
-        div.onclick = () => {
-            document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-            div.classList.add('active');
-
-            const currentDisplay = document.getElementById('current-file-name');
-            if (currentDisplay) currentDisplay.innerText = fileName;
-
-            const isAudio = fileName.endsWith('.mp3') || fileName.endsWith('.wav');
-            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(fileName);
-
-            const editor = document.getElementById('editor');
-            const musicBar = document.getElementById('music-player-bar');
-            const audioEl = document.getElementById('main-audio');
-
-            if (isAudio && audioEl) {
-                if (musicBar) musicBar.style.display = 'flex';
-                audioEl.src = filesData[fileName];
-                audioEl.play();
-                aiShazam(fileName);
-            }
-
-            if (isImage) {
-                const previewImg = document.getElementById('preview-img');
-                if (previewImg) previewImg.src = filesData[fileName];
-            } else if (editor) {
-                editor.value = filesData[fileName] || "";
-            }
-        };
-        list.appendChild(div);
-    });
-}
-
 function getFileIcon(fileName) {
     const ext = fileName.split('.').pop().toLowerCase();
     const icons = {
@@ -504,6 +437,58 @@ function getFileIcon(fileName) {
         'json': 'https://img.icons8.com/color/24/json--v1.png'
     };
     return icons[ext] || 'https://img.icons8.com/color/24/file.png';
+}
+
+function renderFileList() {
+    const list = document.getElementById('file-list');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    
+    Object.keys(filesData).forEach(name => {
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerText = name;
+        
+        div.onclick = () => {
+            document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+            div.classList.add('active');
+
+            const currentDisplay = document.getElementById('current-file-name');
+            if (currentDisplay) currentDisplay.innerText = name;
+
+            const content = filesData[name];
+            const isAudio = name.endsWith('.mp3') || name.endsWith('.wav');
+            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(name);
+
+            const editor = document.getElementById('editor');
+            const musicBar = document.getElementById('music-player-bar');
+            const audioEl = document.getElementById('main-audio');
+            const previewImg = document.getElementById('preview-img');
+            const imgContainer = document.getElementById('image-preview');
+
+            if (isAudio && audioEl) {
+                if (musicBar) musicBar.style.display = 'flex';
+                audioEl.src = content;
+                audioEl.play();
+
+                if (editor) editor.value = `// Listening: ${name}`;
+            }
+
+            if (isImage) {
+                if (editor) editor.style.display = 'none';
+                if (imgContainer) imgContainer.style.display = 'flex';
+                if (previewImg) previewImg.src = content;
+            } else {
+                if (editor) {
+                    editor.style.display = 'block';
+                    if (imgContainer) imgContainer.style.display = 'none';
+                    editor.value = content || "";
+                }
+            }
+        };
+        list.appendChild(div);
+    });
 }
 
 ['dragover', 'dragenter'].forEach(eventName => {
