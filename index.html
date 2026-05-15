@@ -392,6 +392,11 @@ explorer.addEventListener('drop', (e) => {
 
 function handleFiles(files) {
     for (let file of files) {
+        if (file.size > 25 * 1024 * 1024) {
+            alert(`Файл ${file.name} слишком тяжелый для браузера! (макс. 25МБ)`);
+            continue;
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
             filesData[file.name] = e.target.result;
