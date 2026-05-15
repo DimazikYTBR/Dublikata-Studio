@@ -591,7 +591,13 @@ window.addEventListener('load', () => {
     renderFileList();
     const firstFile = Object.keys(filesData)[0];
     if (firstFile) {
-        currentFileNameDisplay.innerText = firstFile;
+        const nameDisplay = document.getElementById('current-file-name'); 
+
+if (nameDisplay && firstFile) {
+    nameDisplay.innerText = firstFile;
+} else {
+    console.log("AI Info: Элемент отображения имени не найден, но код работает дальше.");
+}
         editorTextArea.value = filesData[firstFile];
     }
 
