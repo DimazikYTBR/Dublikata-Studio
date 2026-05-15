@@ -587,20 +587,17 @@ document.getElementById('real-file-input').addEventListener('change', (e) => {
 });
 
 editorTextArea.addEventListener('input', () => {
-    if (!currentFileNameDisplay) {
-        console.warn("AI Info: Некуда сохранять, заголовок файла не найден.");
-        return;
-    }
+    if (!currentFileNameDisplay) return;
 
     const currentFile = currentFileNameDisplay.innerText.trim();
 
     if (currentFile && currentFile !== "" && filesData.hasOwnProperty(currentFile)) {
 
         filesData[currentFile] = editorTextArea.value;
-
         saveFileToDB(currentFile, editorTextArea.value);
 
-        console.log(`Автосохранение: ${currentFile}`);
+    } else {
+        console.warn("Saving skipped: No file selected or file missing in database.");
     }
 });
 
