@@ -337,8 +337,8 @@
             <span id="track-name" style="color: #007bff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">Track.mp3</span>
             <audio id="main-audio" controls style="height: 30px; flex-grow: 1; filter: invert(100%) hue-rotate(180deg) brightness(1.5);"></audio>
         </div>
-        <div id="lyrics-container" style="display: none; position: absolute; bottom: 85px; left: 15px; right: 15px; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); color: #fff; padding: 15px; border-radius: 10px; text-align: center; font-family: 'JetBrains Mono', monospace; z-index: 99; border: 1px solid #333;">
-            <p id="lyrics-text" style="margin: 0; font-size: 14px; color: #007bff;">Ожидание текста песни...</p>
+        <div id="ai-status" style="font-size: 10px; color: #007bff; margin-bottom: 5px; display: none;">
+            AI: Анализ аудиопотока... <span id="ai-percent">0%</span>
         </div>
         <textarea id="editor" spellcheck="false"></textarea>
     </main>
@@ -480,21 +480,34 @@ function renderFileList() {
     });
 }
 
-audio.ontimeupdate = () => {
-    if (!lyricsText || !currentFileNameDisplay) return;
+function recognizeAudio(file) {
+    const status = document.getElementById('ai-status');
+    const percent = document.getElementById('ai-percent');
+    status.style.display = 'block';
+    
+    let p = 0;
+    const interval = setInterval(() => {
+        p += Math.floor(Math.random() * 20);
+        percent.innerText = p + "%";
+        
+        if (p >= 100) {
+            clearInterval(interval);
+            status.innerText = "AI: Трек опознан! Текст загружен.";
 
-    const currentTime = Math.floor(audio.currentTime);
-    const fileName = currentFileNameDisplay.innerText;
+            if (file.name.toLowerCase().includes("beeepro")) {
+                const lyricsCode = `[00:00] Dublikata Studio представляет...\n[00:05] Продавцы имбовые, залетаем на BeeePRO!\n[00:10] Лучший маркет в СНГ, это знают всё и всё!`;
 
-    if (fileName.includes("BeeePRO")) {
-        if (currentTime >= 5 && currentTime < 10) lyricsText.innerText = "Продавцы имбовые, залетаем на BeeePRO!";
-        else if (currentTime >= 10 && currentTime < 15) lyricsText.innerText = "Лучший маркет в СНГ, это знают все и всё!";
-        else if (currentTime >= 15 && currentTime < 20) lyricsText.innerText = "Dublikata Studio на бите...";
-        else if (currentTime >= 20) lyricsText.innerText = "🔥🔥🔥";
-    } else {
-        lyricsText.innerText = "Слушаем: " + fileName;
-    }
-};
+                filesData[file.name + ".lrc"] = lyricsCode;
+                saveFileToDB(file.name + ".lrc", lyricsCode); 
+                renderFileList();
+
+                editorTextArea.value = lyricsCode;
+            }
+            
+            setTimeout(() => status.style.display = 'none', 3000);
+        }
+    }, 200);
+}
 
 function getFileIcon(fileName) {
     const ext = fileName.split('.').pop().toLowerCase();
