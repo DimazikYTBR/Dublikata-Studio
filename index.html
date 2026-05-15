@@ -460,40 +460,43 @@ function renderFileList() {
         div.onclick = () => {
             document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
             div.classList.add('active');
-            currentFileNameDisplay.innerText = fileName;
+
+            const currentDisplay = document.getElementById('current-file-name');
+            if (currentDisplay) currentDisplay.innerText = name;
 
             const editor = document.getElementById('editor');
             const imgPreview = document.getElementById('image-preview');
             const previewImg = document.getElementById('preview-img');
-            const isAudio = fileName.endsWith('.mp3') || fileName.endsWith('.wav');
             const musicBar = document.getElementById('music-player-bar');
             const audio = document.getElementById('main-audio');
-            const trackName = document.getElementById('track-name');
             const editorArea = document.querySelector('.code-editor-area');
+            const lyricsContainer = document.getElementById('lyrics-container');
 
-            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(fileName);
+            const isAudio = name.endsWith('.mp3') || name.endsWith('.wav');
+            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(name);
 
-            if (isAudio) {
+            if (isAudio && audio && musicBar) {
                 musicBar.style.display = 'flex';
-                editorArea.classList.add('shifted');
-                lyricsContainer.style.display = 'block';
+                if (editorArea) editorArea.classList.add('shifted');
+                if (lyricsContainer) lyricsContainer.style.display = 'block';
     
-                audio.src = filesData[fileName];
+                audio.src = filesData[name];
                 audio.play();
-                } else {
-                    if (musicBar.style.display === 'flex') {
-                    editorArea.classList.add('shifted');
-                }
+
+                if (typeof aiShazam === 'function') aiShazam(name);
+                
+            } else if (musicBar && musicBar.style.display === 'flex') {
+                if (editorArea) editorArea.classList.add('shifted');
             }
 
-            if (isImage) {
-                editor.style.display = 'none';
+            if (isImage && imgPreview && previewImg) {
+                if (editor) editor.style.display = 'none';
                 imgPreview.style.display = 'flex';
-                previewImg.src = filesData[fileName];
-            } else {
+                previewImg.src = filesData[name];
+            } else if (editor) {
                 editor.style.display = 'block';
-                imgPreview.style.display = 'none';
-                editor.value = filesData[fileName] || "";
+                if (imgPreview) imgPreview.style.display = 'none';
+                editor.value = filesData[name] || "";
             }
         };
         list.appendChild(div);
