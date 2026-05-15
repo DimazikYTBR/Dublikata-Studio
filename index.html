@@ -345,21 +345,38 @@
 </div>
 
 <script>
-const audio = new Audio();
 const dbRequest = indexedDB.open("DublikataDB", 1);
-let db;
 
 dbRequest.onupgradeneeded = (e) => {
-    db = e.target.result;
-    if (!db.objectStoreNames.contains("files")) {
-        db.createObjectStore("files");
-    }
+    e.target.result.createObjectStore("files");
 };
 
 dbRequest.onsuccess = (e) => {
     db = e.target.result;
-    loadFilesFromDB(); 
+    console.log("База DublikataDB подключена!");
+
+    const transaction = db.transaction("files", "readonly");
+    const store = transaction.objectStore("files");
+    
+    store.openCursor().onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+            filesData[cursor.key] = cursor.value;
+            cursor.continue();
+        } else {
+            renderFileList();
+        }
+    };
 };
+
+let db;
+let filesData = JSON.parse(localStorage.getItem('dublikata_files')) || {};
+const audio = new Audio();
+
+const projectInput = document.getElementById('project-name');
+const editorTextArea = document.querySelector('.code-editor-area');
+const lyricsText = document.getElementById('lyrics-text');
+const currentFileNameDisplay = document.getElementById('current-file-name');
 
 function saveFileToDB(name, data) {
     const transaction = db.transaction(["files"], "readwrite");
@@ -401,19 +418,13 @@ function saveToStorage() {
 }
 
 const lyricsContainer = document.getElementById('lyrics-container');
-const lyricsText = document.getElementById('lyrics-text');
-
-let filesData = JSON.parse(localStorage.getItem('dublikata_files')) || {};
 
 if (Object.keys(filesData).length === 0) {
     filesData["readme.txt"] = "Добро пожаловать в Dublikata Studio!\nПеретащи сюда свои файлы проекта.";
 }
 
 const fileList = document.getElementById('file-list');
-const editorTextArea = document.getElementById('editor');
-const currentFileNameDisplay = document.getElementById('current-filename');
 const explorer = document.querySelector('.file-explorer');
-const projectInput = document.getElementById('project-name');
 
 function renderFileList() {
     fileList.innerHTML = '';
@@ -470,21 +481,18 @@ function renderFileList() {
 }
 
 audio.ontimeupdate = () => {
-    const lyricsText = document.getElementById('lyrics-text');
-    if (!lyricsText) return; 
+    if (!lyricsText || !currentFileNameDisplay) return;
 
     const currentTime = Math.floor(audio.currentTime);
-    
-    const currentName = currentFileNameDisplay ? currentFileNameDisplay.innerText : "";
+    const fileName = currentFileNameDisplay.innerText;
 
-    if (currentName.includes("BeeePRO")) {
-        if (currentTime >= 0 && currentTime < 5) lyricsText.innerText = "Dublikata Studio представляет...";
-        else if (currentTime >= 5 && currentTime < 10) lyricsText.innerText = "Продавцы имбовые, залетаем на BeeePRO!";
-        else if (currentTime >= 10 && currentTime < 15) lyricsText.innerText = "Лучший маркет в СНГ, это знают всё и всё!";
+    if (fileName.includes("BeeePRO")) {
+        if (currentTime >= 5 && currentTime < 10) lyricsText.innerText = "Продавцы имбовые, залетаем на BeeePRO!";
+        else if (currentTime >= 10 && currentTime < 15) lyricsText.innerText = "Лучший маркет в СНГ, это знают все и всё!";
         else if (currentTime >= 15 && currentTime < 20) lyricsText.innerText = "Dublikata Studio на бите...";
-        else lyricsText.innerText = "🔥🔥🔥";
+        else if (currentTime >= 20) lyricsText.innerText = "🔥🔥🔥";
     } else {
-        lyricsText.innerText = "Слушаем: " + currentName;
+        lyricsText.innerText = "Слушаем: " + fileName;
     }
 };
 
