@@ -402,23 +402,24 @@ function loadFilesFromDB() {
     };
 }
 
-async function aiShazam(file) {
+async function aiShazam(fileName) {
+    if (!fileName || typeof fileName !== 'string') return;
+
     if (lyricsText) {
         lyricsText.innerText = "AI: Анализирую частоты...";
-        lyricsText.style.color = "#007bff";
     }
 
     await new Promise(res => setTimeout(res, 2000));
 
-    if (file.name.toLowerCase().includes("beeepro") || file.name.toLowerCase().includes("perfect")) {
+    if (fileName.toLowerCase().includes("beeepro") || fileName.toLowerCase().includes("perfect")) {
         const textCode = `// AI: ТРЕК ОПОЗНАН\n[00:05] Продавцы имбовые, залетаем на BeeePRO!\n[00:10] Лучший маркет в СНГ!`;
-
-        const lrcName = file.name + ".lrc";
+        
+        const lrcName = fileName + ".lrc";
         filesData[lrcName] = textCode;
         saveFileToDB(lrcName, textCode);
         
-        if (lyricsText) lyricsText.innerText = "AI: Текст успешно синхронизирован!";
-        renderFileList();
+        if (lyricsText) lyricsText.innerText = "AI: Текст синхронизирован!";
+        renderFileList(); 
     }
 }
 
@@ -452,51 +453,37 @@ function renderFileList() {
     
     list.innerHTML = '';
     
-    Object.keys(filesData).forEach(name => {
+    Object.keys(filesData).forEach(fileName => {
         const div = document.createElement('div');
         div.className = 'file-item';
-        div.innerText = name;
+        div.innerText = fileName;
         
         div.onclick = () => {
             document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
             div.classList.add('active');
 
             const currentDisplay = document.getElementById('current-file-name');
-            if (currentDisplay) currentDisplay.innerText = name;
+            if (currentDisplay) currentDisplay.innerText = fileName;
+
+            const isAudio = fileName.endsWith('.mp3') || fileName.endsWith('.wav');
+            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(fileName);
 
             const editor = document.getElementById('editor');
-            const imgPreview = document.getElementById('image-preview');
-            const previewImg = document.getElementById('preview-img');
             const musicBar = document.getElementById('music-player-bar');
-            const audio = document.getElementById('main-audio');
-            const editorArea = document.querySelector('.code-editor-area');
-            const lyricsContainer = document.getElementById('lyrics-container');
+            const audioEl = document.getElementById('main-audio');
 
-            const isAudio = name.endsWith('.mp3') || name.endsWith('.wav');
-            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(name);
-
-            if (isAudio && audio && musicBar) {
-                musicBar.style.display = 'flex';
-                if (editorArea) editorArea.classList.add('shifted');
-                if (lyricsContainer) lyricsContainer.style.display = 'block';
-    
-                audio.src = filesData[name];
-                audio.play();
-
-                if (typeof aiShazam === 'function') aiShazam(name);
-                
-            } else if (musicBar && musicBar.style.display === 'flex') {
-                if (editorArea) editorArea.classList.add('shifted');
+            if (isAudio && audioEl) {
+                if (musicBar) musicBar.style.display = 'flex';
+                audioEl.src = filesData[fileName];
+                audioEl.play();
+                aiShazam(fileName);
             }
 
-            if (isImage && imgPreview && previewImg) {
-                if (editor) editor.style.display = 'none';
-                imgPreview.style.display = 'flex';
-                previewImg.src = filesData[name];
+            if (isImage) {
+                const previewImg = document.getElementById('preview-img');
+                if (previewImg) previewImg.src = filesData[fileName];
             } else if (editor) {
-                editor.style.display = 'block';
-                if (imgPreview) imgPreview.style.display = 'none';
-                editor.value = filesData[name] || "";
+                editor.value = filesData[fileName] || "";
             }
         };
         list.appendChild(div);
