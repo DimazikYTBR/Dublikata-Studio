@@ -329,53 +329,55 @@ const currentFileNameDisplay = document.getElementById('current-filename');
 const explorer = document.querySelector('.file-explorer');
 const projectInput = document.getElementById('project-name');
 
+function getFileIcon(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    const icons = {
+        'html': 'https://img.icons8.com/color/24/html-5--v1.png',
+        'css': 'https://img.icons8.com/color/24/css3.png',
+        'js': 'https://img.icons8.com/color/24/javascript--v1.png',
+        'txt': 'https://img.icons8.com/color/24/txt.png',
+        'java': 'https://img.icons8.com/color/24/java-main.png',
+        'png': 'https://img.icons8.com/color/24/image.png',
+        'jpg': 'https://img.icons8.com/color/24/image.png',
+        'jpeg': 'https://img.icons8.com/color/24/image.png',
+        'apk': 'https://img.icons8.com/color/24/android-os.png',
+        'json': 'https://img.icons8.com/color/24/json--v1.png'
+    };
+    return icons[ext] || 'https://img.icons8.com/color/24/file.png';
+}
+
 function renderFileList() {
     fileList.innerHTML = '';
     Object.keys(filesData).forEach(fileName => {
         const li = document.createElement('li');
-        li.className = 'file-item' + (currentFileNameDisplay.innerText === fileName ? ' active' : '');
+        const isActive = currentFileNameDisplay.innerText === fileName;
+        li.className = 'file-item' + (isActive ? ' active' : '');
+
+        const iconUrl = getFileIcon(fileName);
+
+        li.innerHTML = `<img src="${iconUrl}" alt="icon" style="width:18px; margin-right:8px;"> ${fileName}`;
         
-        let icon = 'https://img.icons8.com/color/24/file.png';
-        function getFileIcon(fileName) {
-        const ext = fileName.split('.').pop().toLowerCase();
-    
-        const icons = {
-            'html': 'https://img.icons8.com/color/24/html-5--v1.png',
-            'css': 'https://img.icons8.com/color/24/css3.png',
-            'js': 'https://img.icons8.com/color/24/javascript--v1.png',
-            'txt': 'https://img.icons8.com/color/24/txt.png',
-            'java': 'https://img.icons8.com/color/24/java-main.png',
-            'png': 'https://img.icons8.com/color/24/image.png',
-            'jpg': 'https://img.icons8.com/color/24/image.png',
-            'jpeg': 'https://img.icons8.com/color/24/image.png',
-            'apk': 'https://img.icons8.com/color/24/android-os.png',
-            'json': 'https://img.icons8.com/color/24/json--v1.png'
+        li.onclick = () => {
+            document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+            li.classList.add('active');
+            currentFileNameDisplay.innerText = fileName;
+
+            const editor = document.getElementById('editor');
+            const imgPreview = document.getElementById('image-preview');
+            const previewImg = document.getElementById('preview-img');
+
+            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(fileName);
+
+            if (isImage) {
+                editor.style.display = 'none';
+                imgPreview.style.display = 'flex';
+                previewImg.src = filesData[fileName];
+            } else {
+                editor.style.display = 'block';
+                imgPreview.style.display = 'none';
+                editor.value = filesData[fileName] || "";
+            }
         };
-
-        return icons[ext] || 'https://img.icons8.com/color/24/file.png';
-
-        li.innerHTML = `<img src="${icon}" alt="icon"> ${fileName}`;
-    }
-        
-li.onclick = () => {
-    document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-    li.classList.add('active');
-    currentFileNameDisplay.innerText = fileName;
-
-    const editor = document.getElementById('editor');
-    const imgPreview = document.getElementById('image-preview');
-    const previewImg = document.getElementById('preview-img');
-
-    if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.gif')) {
-        editor.style.display = 'none';
-        imgPreview.style.display = 'flex';
-        previewImg.src = filesData[fileName];
-    } else {
-        editor.style.display = 'block';
-        imgPreview.style.display = 'none';
-        editor.value = filesData[fileName];
-    }
-};
         fileList.appendChild(li);
     });
 }
