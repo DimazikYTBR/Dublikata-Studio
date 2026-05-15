@@ -316,6 +316,60 @@
 </div>
 
 <script>
+const explorer = document.querySelector('.file-explorer');
+
+['dragover', 'dragenter'].forEach(eventName => {
+    explorer.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        explorer.style.borderColor = "#007bff";
+        explorer.style.background = "#1a1a1a";
+    });
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    explorer.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        explorer.style.borderColor = "#1a1a1a";
+        explorer.style.background = "#0f0f0f";
+    });
+});
+
+explorer.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    handleFiles(files); 
+});
+
+function handleFiles(files) {
+    for (let file of files) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            const fileName = file.name;
+            
+            filesData[fileName] = content;
+            
+            const li = document.createElement('li');
+            li.className = 'file-item';
+            let icon = 'https://img.icons8.com/color/24/file.png';
+            if (fileName.endsWith('.html')) icon = 'https://img.icons8.com/color/24/html-5--v1.png';
+            if (fileName.endsWith('.css')) icon = 'https://img.icons8.com/color/24/css3.png';
+            if (fileName.endsWith('.js')) icon = 'https://img.icons8.com/color/24/javascript--v1.png';
+
+            li.innerHTML = `<img src="${icon}" alt="icon"> ${fileName}`;
+            li.addEventListener('click', () => {
+                document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+                li.classList.add('active');
+                currentFileNameDisplay.innerText = fileName;
+                editorTextArea.value = filesData[fileName];
+            });
+            fileList.appendChild(li);
+        };
+        reader.readAsText(file);
+    }
+}
+
 const fileInput = document.getElementById('real-file-input');
 const fileList = document.getElementById('file-list');
 
@@ -376,6 +430,12 @@ fileItems.forEach(item => {
         
         console.log("Открыт файл: " + filename);
     });
+});
+
+editorTextArea.addEventListener('input', () => {
+    const currentFile = currentFileNameDisplay.innerText;
+    filesData[currentFile] = editorTextArea.value;
+    localStorage.setItem('dublikata_files', JSON.stringify(filesData));
 });
 
 const projectInput = document.getElementById('project-name');
