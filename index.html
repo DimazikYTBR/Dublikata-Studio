@@ -300,7 +300,7 @@
             <span id="current-filename">index.html</span>
             <button id="save-btn">Сохранить на GitHub</button>
         </div>
-        <textarea id="editor" spellcheck="false" placeholder="Начните писать код..."></textarea>
+        <textarea id="editor" spellcheck="false"></textarea>
     </main>
 </div>
 
@@ -310,9 +310,7 @@ const currentFileNameDisplay = document.getElementById('current-filename');
 const editorTextArea = document.getElementById('editor');
 
 const filesData = {
-    "index.html": `<!doctype html>\n<html>...</html>`,
-    "style.css": `body {\n  background: #000;\n}`,
-    "script.js": `console.log("Dublikata Studio запущен!");`
+
 };
 
 fileItems.forEach(item => {
