@@ -381,6 +381,23 @@ function saveFileToDB(name, data) {
     store.put(data, name);
 }
 
+function saveCurrentFile() {
+    const displayElement = document.getElementById('current-file-name');
+    if (!displayElement) {
+        console.error("Ошибка: Не найден элемент 'current-file-name' для определения имени файла");
+        return;
+    }
+    
+    const fileName = displayElement.innerText.trim();
+    const content = document.getElementById('editor').value;
+
+    if (fileName && content !== undefined) {
+        filesData[fileName] = content;
+        saveFileToDB(fileName, content);
+        console.log(`Файл ${fileName} сохранен в DublikataDB`);
+    }
+}
+
 function loadFilesFromDB() {
     const transaction = db.transaction(["files"], "readonly");
     const store = transaction.objectStore("files");
@@ -545,10 +562,20 @@ document.getElementById('real-file-input').addEventListener('change', (e) => {
 });
 
 editorTextArea.addEventListener('input', () => {
+    if (!currentFileNameDisplay) {
+        console.warn("AI Info: Некуда сохранять, заголовок файла не найден.");
+        return;
+    }
+
     const currentFile = currentFileNameDisplay.innerText.trim();
-    if (currentFile && filesData.hasOwnProperty(currentFile)) {
+
+    if (currentFile && currentFile !== "" && filesData.hasOwnProperty(currentFile)) {
+
         filesData[currentFile] = editorTextArea.value;
+
         saveFileToDB(currentFile, editorTextArea.value);
+
+        console.log(`Автосохранение: ${currentFile}`);
     }
 });
 
