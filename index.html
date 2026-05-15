@@ -452,19 +452,25 @@ function handleFiles(files) {
             continue;
         }
 
+        if (file.type.startsWith('audio/')) {
+            filesData[file.name] = URL.createObjectURL(file);
+            renderFileList();
+            continue; 
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
             filesData[file.name] = e.target.result;
-            localStorage.setItem('dublikata_files', JSON.stringify(filesData));
+            if (!isTooBig) {
+                try {
+                    localStorage.setItem('dublikata_files', JSON.stringify(filesData));
+                } catch (err) {
+                    console.error("Место закончилось! Очисти лишнее.");
+                    alert("Ошибка сохранения: слишком много данных!");
+                }
+            }
             renderFileList();
         };
-
-        if (file.type.startsWith('audio/')) {
-            const blobUrl = URL.createObjectURL(file);
-            filesData[file.name] = blobUrl;
-            renderFileList();
-            continue;
-        }
 
         if (file.type.startsWith('image/')) {
             reader.readAsDataURL(file);
