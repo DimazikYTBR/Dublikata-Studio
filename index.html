@@ -448,43 +448,48 @@ function renderFileList() {
     Object.keys(filesData).forEach(name => {
         const div = document.createElement('div');
         div.className = 'file-item';
-        div.innerText = name;
+
+        const iconUrl = (typeof getFileIcon === 'function') ? getFileIcon(name) : '';
+
+        div.innerHTML = `
+            <img src="${iconUrl}" class="file-icon-img" style="width:18px; margin-right:8px;">
+            <span class="file-name">${name}</span>
+        `;
         
         div.onclick = () => {
             document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
             div.classList.add('active');
 
-            const currentDisplay = document.getElementById('current-file-name');
-            if (currentDisplay) currentDisplay.innerText = name;
+            const nameTitle = document.getElementById('current-file-name');
+            if (nameTitle) {
+                nameTitle.innerText = name;
+            }
 
             const content = filesData[name];
             const isAudio = name.endsWith('.mp3') || name.endsWith('.wav');
-            const isImage = /\.(png|jpg|jpeg|gif|webp|ico)$/i.test(name);
+            const isImage = /\.(png|jpg|jpeg|gif|webp)$/i.test(name);
 
             const editor = document.getElementById('editor');
-            const musicBar = document.getElementById('music-player-bar');
             const audioEl = document.getElementById('main-audio');
+            const musicBar = document.getElementById('music-player-bar');
+            const imgPreview = document.getElementById('image-preview');
             const previewImg = document.getElementById('preview-img');
-            const imgContainer = document.getElementById('image-preview');
 
             if (isAudio && audioEl) {
                 if (musicBar) musicBar.style.display = 'flex';
                 audioEl.src = content;
-                audioEl.play();
-
+                audioEl.play().catch(e => console.log("Ошибка автоплея:", e));
                 if (editor) editor.value = `// Listening: ${name}`;
             }
 
-            if (isImage) {
+            if (isImage && imgPreview && previewImg) {
                 if (editor) editor.style.display = 'none';
-                if (imgContainer) imgContainer.style.display = 'flex';
-                if (previewImg) previewImg.src = content;
-            } else {
-                if (editor) {
-                    editor.style.display = 'block';
-                    if (imgContainer) imgContainer.style.display = 'none';
-                    editor.value = content || "";
-                }
+                imgPreview.style.display = 'flex';
+                previewImg.src = content;
+            } else if (editor) {
+                editor.style.display = 'block';
+                if (imgPreview) imgPreview.style.display = 'none';
+                editor.value = content || "";
             }
         };
         list.appendChild(div);
