@@ -305,6 +305,31 @@
 </div>
 
 <script>
+const fileItems = document.querySelectorAll('.file-item');
+const currentFileNameDisplay = document.getElementById('current-filename');
+const editorTextArea = document.getElementById('editor');
+
+const filesData = {
+    "index.html": `\n<!doctype html>\n<html>...</html>`,
+    "style.css": `/* Стили проекта */\nbody {\n  background: #000;\n}`,
+    "script.js": `// Твои скрипты\nconsole.log("Dublikata Studio запущен!");`
+};
+
+fileItems.forEach(item => {
+    item.addEventListener('click', () => {
+        fileItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        const filename = item.innerText.trim();
+
+        currentFileNameDisplay.innerText = filename;
+
+        editorTextArea.value = filesData[filename] || "";
+        
+        console.log("Открыт файл: " + filename);
+    });
+});
+
 const projectInput = document.getElementById('project-name');
 
 const savedName = localStorage.getItem('dublikata_project_name');
