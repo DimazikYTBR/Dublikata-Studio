@@ -316,120 +316,76 @@
 </div>
 
 <script>
+let filesData = JSON.parse(localStorage.getItem('dublikata_files')) || {
+    "index.html": "<!doctype html>\n<html>\n<body>\n  <h1>Dublikata Studio</h1>\n</body>\n</html>",
+    "style.css": "body { background: #050505; color: white; }",
+    "script.js": "console.log('Studio Loaded');"
+};
+
+const fileList = document.getElementById('file-list');
+const editorTextArea = document.getElementById('editor');
+const currentFileNameDisplay = document.getElementById('current-filename');
 const explorer = document.querySelector('.file-explorer');
+const projectInput = document.getElementById('project-name');
+
+function renderFileList() {
+    fileList.innerHTML = ''; // Очищаем список
+    Object.keys(filesData).forEach(fileName => {
+        const li = document.createElement('li');
+        li.className = 'file-item' + (currentFileNameDisplay.innerText === fileName ? ' active' : '');
+        
+        let icon = 'https://img.icons8.com/color/24/file.png';
+        if (fileName.endsWith('.html')) icon = 'https://img.icons8.com/color/24/html-5--v1.png';
+        if (fileName.endsWith('.css')) icon = 'https://img.icons8.com/color/24/css3.png';
+        if (fileName.endsWith('.js')) icon = 'https://img.icons8.com/color/24/javascript--v1.png';
+
+        li.innerHTML = `<img src="${icon}" alt="icon"> ${fileName}`;
+        
+        li.onclick = () => {
+            document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
+            li.classList.add('active');
+            currentFileNameDisplay.innerText = fileName;
+            editorTextArea.value = filesData[fileName];
+        };
+        fileList.appendChild(li);
+    });
+}
 
 ['dragover', 'dragenter'].forEach(eventName => {
     explorer.addEventListener(eventName, (e) => {
         e.preventDefault();
+        e.stopPropagation();
         explorer.style.borderColor = "#007bff";
-        explorer.style.background = "#1a1a1a";
     });
 });
 
 ['dragleave', 'drop'].forEach(eventName => {
     explorer.addEventListener(eventName, (e) => {
         e.preventDefault();
+        e.stopPropagation();
         explorer.style.borderColor = "#1a1a1a";
-        explorer.style.background = "#0f0f0f";
     });
 });
 
 explorer.addEventListener('drop', (e) => {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-
-    handleFiles(files); 
+    const files = e.dataTransfer.files;
+    handleFiles(files);
 });
 
 function handleFiles(files) {
     for (let file of files) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-            const content = e.target.result;
-            const fileName = file.name;
-            
-            filesData[fileName] = content;
-            
-            const li = document.createElement('li');
-            li.className = 'file-item';
-            let icon = 'https://img.icons8.com/color/24/file.png';
-            if (fileName.endsWith('.html')) icon = 'https://img.icons8.com/color/24/html-5--v1.png';
-            if (fileName.endsWith('.css')) icon = 'https://img.icons8.com/color/24/css3.png';
-            if (fileName.endsWith('.js')) icon = 'https://img.icons8.com/color/24/javascript--v1.png';
-
-            li.innerHTML = `<img src="${icon}" alt="icon"> ${fileName}`;
-            li.addEventListener('click', () => {
-                document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-                li.classList.add('active');
-                currentFileNameDisplay.innerText = fileName;
-                editorTextArea.value = filesData[fileName];
-            });
-            fileList.appendChild(li);
+        reader.onload = (e) => {
+            filesData[file.name] = e.target.result;
+            localStorage.setItem('dublikata_files', JSON.stringify(filesData));
+            renderFileList();
         };
         reader.readAsText(file);
     }
 }
 
-const fileInput = document.getElementById('real-file-input');
-const fileList = document.getElementById('file-list');
-
-fileInput.addEventListener('change', function(e) {
-    const files = e.target.files;
-    
-    for (let file of files) {
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const content = e.target.result;
-            const fileName = file.name;
-
-            filesData[fileName] = content;
-
-            const li = document.createElement('li');
-            li.className = 'file-item';
-            
-            let icon = 'https://img.icons8.com/color/24/file.png';
-            if (fileName.endsWith('.html')) icon = 'https://img.icons8.com/color/24/html-5--v1.png';
-            if (fileName.endsWith('.css')) icon = 'https://img.icons8.com/color/24/css3.png';
-            if (fileName.endsWith('.js')) icon = 'https://img.icons8.com/color/24/javascript--v1.png';
-
-            li.innerHTML = `<img src="${icon}" alt="icon"> ${fileName}`;
-
-            li.addEventListener('click', () => {
-                document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-                li.classList.add('active');
-                currentFileNameDisplay.innerText = fileName;
-                editorTextArea.value = filesData[fileName];
-            });
-
-            fileList.appendChild(li);
-        };
-
-        reader.readAsText(file);
-    }
-});
-
-const fileItems = document.querySelectorAll('.file-item');
-const currentFileNameDisplay = document.getElementById('current-filename');
-const editorTextArea = document.getElementById('editor');
-
-const filesData = {
-
-};
-
-fileItems.forEach(item => {
-    item.addEventListener('click', () => {
-        fileItems.forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-
-        const filename = item.innerText.trim();
-
-        currentFileNameDisplay.innerText = filename;
-
-        editorTextArea.value = filesData[filename] || "";
-        
-        console.log("Открыт файл: " + filename);
-    });
+document.getElementById('real-file-input').addEventListener('change', (e) => {
+    handleFiles(e.target.files);
 });
 
 editorTextArea.addEventListener('input', () => {
@@ -438,24 +394,22 @@ editorTextArea.addEventListener('input', () => {
     localStorage.setItem('dublikata_files', JSON.stringify(filesData));
 });
 
-const projectInput = document.getElementById('project-name');
-
 const savedName = localStorage.getItem('dublikata_project_name');
-if (savedName) {
-    projectInput.value = savedName;
-}
+if (savedName) projectInput.value = savedName;
 
 projectInput.addEventListener('input', (e) => {
     localStorage.setItem('dublikata_project_name', e.target.value.toUpperCase());
 });
 
-projectInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        projectInput.blur();
-    }
-});
 window.addEventListener('load', () => {
     const loader = document.getElementById('loader');
+
+    renderFileList();
+    const firstFile = Object.keys(filesData)[0];
+    if (firstFile) {
+        currentFileNameDisplay.innerText = firstFile;
+        editorTextArea.value = filesData[firstFile];
+    }
 
     setTimeout(() => {
         loader.classList.add('loader-hidden');
