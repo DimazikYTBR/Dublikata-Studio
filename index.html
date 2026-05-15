@@ -340,6 +340,9 @@ function renderFileList() {
         if (fileName.endsWith('.css')) icon = 'https://img.icons8.com/color/24/css3.png';
         if (fileName.endsWith('.js')) icon = 'https://img.icons8.com/color/24/javascript--v1.png';
         if (fileName.endsWith('.txt')) icon = 'https://img.icons8.com/color/24/txt.png';
+        if (fileName.match(/\.(png|jpg|jpeg|gif|webp)$/i)) {
+            icon = 'https://img.icons8.com/color/24/image.png'; 
+        }
 
         li.innerHTML = `<img src="${icon}" alt="icon"> ${fileName}`;
         
