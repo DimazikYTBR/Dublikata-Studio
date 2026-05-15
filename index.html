@@ -329,23 +329,6 @@ const currentFileNameDisplay = document.getElementById('current-filename');
 const explorer = document.querySelector('.file-explorer');
 const projectInput = document.getElementById('project-name');
 
-function getFileIcon(fileName) {
-    const ext = fileName.split('.').pop().toLowerCase();
-    const icons = {
-        'html': 'https://img.icons8.com/color/24/html-5--v1.png',
-        'css': 'https://img.icons8.com/color/24/css3.png',
-        'js': 'https://img.icons8.com/color/24/javascript--v1.png',
-        'txt': 'https://img.icons8.com/color/24/txt.png',
-        'java': 'https://img.icons8.com/color/24/java-main.png',
-        'png': 'https://img.icons8.com/color/24/image.png',
-        'jpg': 'https://img.icons8.com/color/24/image.png',
-        'jpeg': 'https://img.icons8.com/color/24/image.png',
-        'apk': 'https://img.icons8.com/color/24/android-os.png',
-        'json': 'https://img.icons8.com/color/24/json--v1.png'
-    };
-    return icons[ext] || 'https://img.icons8.com/color/24/file.png';
-}
-
 function renderFileList() {
     fileList.innerHTML = '';
     Object.keys(filesData).forEach(fileName => {
@@ -355,7 +338,7 @@ function renderFileList() {
 
         const iconUrl = getFileIcon(fileName);
 
-        li.innerHTML = `<img src="${iconUrl}" alt="icon" style="width:18px; margin-right:8px;"> ${fileName}`;
+        li.innerHTML = `<img src="${iconUrl}" style="width:18px; height:18px; margin-right:10px;"><span>${fileName}</span>`;
         
         li.onclick = () => {
             document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
@@ -380,6 +363,22 @@ function renderFileList() {
         };
         fileList.appendChild(li);
     });
+}
+
+function getFileIcon(fileName) {
+    const ext = fileName.split('.').pop().toLowerCase();
+    const icons = {
+        'html': 'https://img.icons8.com/color/24/html-5--v1.png',
+        'css': 'https://img.icons8.com/color/24/css3.png',
+        'js': 'https://img.icons8.com/color/24/javascript--v1.png',
+        'txt': 'https://img.icons8.com/color/24/txt.png',
+        'java': 'https://img.icons8.com/color/24/java-main.png',
+        'png': 'https://img.icons8.com/color/24/image.png',
+        'jpg': 'https://img.icons8.com/color/24/image.png',
+        'apk': 'https://img.icons8.com/color/24/android-os.png',
+        'json': 'https://img.icons8.com/color/24/json--v1.png'
+    };
+    return icons[ext] || 'https://img.icons8.com/color/24/file.png';
 }
 
 ['dragover', 'dragenter'].forEach(eventName => {
