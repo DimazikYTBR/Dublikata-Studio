@@ -459,7 +459,7 @@ function renderFileList() {
         
         div.onclick = () => {
             document.querySelectorAll('.file-item').forEach(i => i.classList.remove('active'));
-            li.classList.add('active');
+            div.classList.add('active');
             currentFileNameDisplay.innerText = fileName;
 
             const editor = document.getElementById('editor');
